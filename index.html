@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>石頭剪刀布</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 50px; /* 控制按鈕之間的間距 */
+        }
+        .button {
+            width: 100px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s, color 0.2s;
+        }
+        .button:hover {
+            transform: scale(1.1);
+            background-color: lightblue;
+            color: white; /* 更換文字顏色 */
+        }
+        #result, #score {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        .win { color: green; }
+        .lose { color: red; }
+        .draw { color: orange; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img class="button" src="https://today-obs.line-scdn.net/0hBYBMOojyHXZ_NA0SzSdiIUdiEQdMUgd_XVUGFw08Q0dbGFMnE1BOFVwzRloCBAomXwZUFlMzRkZXBw8jFg/w644" alt="石頭" onclick="playRound('石頭')" />
+        <img class="button" src="https://shoplineimg.com/565569dbe37ec6a65e00000a/5f6b37ab29a80700112939ca/800x.JPG?" alt="剪刀" onclick="playRound('剪刀')" />
+        <img class="button" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwJsXHza3ZRVd90DnOxFnfp-1iXm5s-jUUqQ&s" alt="布" onclick="playRound('布')" />
+    </div>
+    
+    <div id="result"></div>
+    <div id="score">玩家: 0, 電腦: 0</div>
+
+    <audio id="winSound" src="win.mp3"></audio>
+    <audio id="loseSound" src="lose.mp3"></audio>
+    <audio id="drawSound" src="draw.mp3"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.all.min.js"></script>
+    <script>
+        let playerScore = 0;
+        let computerScore = 0;
+
+        function playRound(player) {
+            const choices = ['石頭', '剪刀', '布'];
+            const computer = choices[Math.floor(Math.random() * choices.length)];
+            const result = determineWinner(player, computer);
+            updateScore();
+
+            document.getElementById('result').innerText = `玩家選擇: ${player}, 電腦選擇: ${computer}. ${result}`;
+
+            // 根據得分檢查是否結束遊戲
+            if (playerScore === 3 || computerScore === 3) {
+                declareWinner();
+            }
+        }
+
+        function determineWinner(player, computer) {
+            if (player === computer) {
+                document.getElementById('drawSound').play();
+                document.getElementById('result').className = 'draw';
+                return '平手！';
+            }
+            if (
+                (player === '石頭' && computer === '剪刀') ||
+                (player === '剪刀' && computer === '布') ||
+                (player === '布' && computer === '石頭')
+            ) {
+                playerScore++;
+                document.getElementById('winSound').play();
+                document.getElementById('result').className = 'win';
+                return '玩家勝利！';
+            } else {
+                computerScore++;
+                document.getElementById('loseSound').play();
+                document.getElementById('result').className = 'lose';
+                return '電腦勝利！';
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerText = `玩家: ${playerScore}, 電腦: ${computerScore}`;
+        }
+
+        function declareWinner() {
+            const winner = playerScore === 3 ? '玩家' : '電腦';
+            Swal.fire({
+                title: '遊戲結束！',
+                text: `${winner} 獲勝！`,
+                icon: winner === '玩家' ? 'success' : 'error',
+                showCancelButton: true,
+                confirmButtonText: '退出',
+                cancelButtonText: '重新開始',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.close();
+                } else {
+                    resetGame();
+                }
+            });
+        }
+
+        function resetGame() {
+            playerScore = 0;
+            computerScore = 0;
+            updateScore();
+            document.getElementById('result').innerText = '';
+            document.getElementById('result').className = '';
+        }
+    </script>
+</body>
+</html>
